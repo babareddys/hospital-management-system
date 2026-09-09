@@ -1,10 +1,10 @@
 # Hospital Management System — MERN Stack
 
-A full rebuild of the original PHP/MySQL Hospital Management System using
-**MongoDB, Express, React, and Node.js**. It keeps the same three roles —
-**Patient**, **Doctor**, and **Admin** — and the same core features:
-appointment booking, doctor session timings, prescriptions, and admin
-management of doctors/patients/appointments.
+A full-stack hospital management web app with role-based portals for
+**Patients**, **Doctors**, and **Admins**. It covers appointment booking,
+doctor session scheduling, prescriptions, and admin management of
+doctors, patients, and appointments — all backed by a REST API with
+JWT authentication and bcrypt password hashing.
 
 ## Features
 
@@ -131,9 +131,9 @@ Visit `http://localhost:5173`.
 | PUT    | `/api/appointments/:id/status`             | Doctor (own)  | Complete/cancel (only from pending) |
 | PUT    | `/api/appointments/:id/prescription`       | Doctor (own)  | Save prescription (marks completed) |
 
-\* Open registration for admins is kept for parity with the original app;
-lock this down (e.g. require an existing admin, or an invite code) before
-deploying publicly.
+\* Open registration for admins is convenient for local development and
+demos; lock this down (e.g. require an existing admin, or an invite code)
+before deploying publicly.
 
 ## Deploying
 
@@ -160,5 +160,4 @@ git push -u origin main
 
 ## License
 
-MIT — see [LICENSE](LICENSE). Rebuilt from the original PHP/MySQL version
-of this project.
+MIT — see [LICENSE](LICENSE).
