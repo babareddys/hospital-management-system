@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-// A unified user model covering the three roles from the original app:
-// patient, doctor, admin. Role-specific fields are optional depending on role,
-// mirroring the original `users` + `patients` + `doctors` tables but merged
-// into a single document (more natural for MongoDB than 3 joined tables).
+// A single collection covering all three account roles: patient, doctor,
+// admin. Role-specific fields are optional depending on role — this keeps
+// auth, profile, and role data together in one document instead of
+// spreading them across separate collections joined by a foreign key.
 const userSchema = new mongoose.Schema(
   {
     username: {
@@ -26,13 +26,13 @@ const userSchema = new mongoose.Schema(
       default: 'patient',
     },
 
-    // ----- Patient-specific fields (mirrors `patients` table) -----
+    // ----- Patient-specific fields -----
     name: { type: String, trim: true },
     age: { type: Number },
     gender: { type: String, enum: ['Male', 'Female', 'Other'] },
     phone: { type: String, trim: true },
 
-    // ----- Doctor-specific fields (mirrors `doctors` table) -----
+    // ----- Doctor-specific fields -----
     specialization: { type: String, trim: true },
   },
   { timestamps: true }

@@ -16,9 +16,14 @@ const DAYS = [
 ];
 
 // @route   POST /api/appointments
-// @desc    Patient books an appointment for a chosen doctor/session/date
-//          (mirrors book_appointment.php, including the check that the
-//          selected date's weekday actually matches the chosen session)
+// @desc    Patient books an appointment for a chosen doctor/session/date.
+//          Validates that the selected date's weekday actually matches the
+//          chosen session, then relies on a partial unique index on the
+//          Appointment model (doctor + appointmentDate + startTime, scoped
+//          to non-cancelled statuses) to make double-booking the same slot
+//          impossible even under concurrent requests. A pre-check below
+//          gives a friendly message for the common case; the index is the
+//          actual guarantee.
 router.post('/', protect, authorize('patient'), async (req, res) => {
   try {
     const { doctorId, dayOfWeek, startTime, selectedDate } = req.body;
@@ -48,15 +53,39 @@ router.post('/', protect, authorize('patient'), async (req, res) => {
     const appointmentDate = new Date(date);
     appointmentDate.setHours(hours, minutes, 0, 0);
 
-    const appointment = await Appointment.create({
-      patient: req.user._id,
+    const existingBooking = await Appointment.findOne({
       doctor: doctorId,
       appointmentDate,
-      dayOfWeek,
       startTime: session.startTime,
-      endTime: session.endTime,
-      status: 'pending',
+      status: { $in: ['pending', 'completed'] },
     });
+    if (existingBooking) {
+      return res.status(409).json({
+        message: 'That slot has just been booked by someone else. Please pick another time.',
+      });
+    }
+
+    let appointment;
+    try {
+      appointment = await Appointment.create({
+        patient: req.user._id,
+        doctor: doctorId,
+        appointmentDate,
+        dayOfWeek,
+        startTime: session.startTime,
+        endTime: session.endTime,
+        status: 'pending',
+      });
+    } catch (err) {
+      // Race condition: two requests passed the pre-check at the same time.
+      // The unique index catches it here.
+      if (err.code === 11000) {
+        return res.status(409).json({
+          message: 'That slot has just been booked by someone else. Please pick another time.',
+        });
+      }
+      throw err;
+    }
 
     res.status(201).json({
       message: `Appointment booked successfully for ${appointmentDate.toLocaleString()}`,
@@ -77,7 +106,7 @@ router.get('/mine', protect, authorize('patient'), async (req, res) => {
 });
 
 // @route   GET /api/appointments/doctor
-// @desc    Doctor: their own appointments (mirrors appointments.php)
+// @desc    Doctor: their own appointments
 router.get('/doctor', protect, authorize('doctor'), async (req, res) => {
   const appointments = await Appointment.find({ doctor: req.user._id })
     .populate('patient', 'name username phone')
@@ -86,7 +115,7 @@ router.get('/doctor', protect, authorize('doctor'), async (req, res) => {
 });
 
 // @route   GET /api/appointments
-// @desc    Admin: every appointment in the system (mirrors manage_appointments.php)
+// @desc    Admin: every appointment in the system
 router.get('/', protect, authorize('admin'), async (req, res) => {
   const appointments = await Appointment.find({})
     .populate('doctor', 'name specialization')
@@ -97,7 +126,6 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
 
 // @route   PUT /api/appointments/:id/status
 // @desc    Doctor updates status; only allowed while status is 'pending'
-//          (mirrors edit_appointment.php)
 router.put('/:id/status', protect, authorize('doctor'), async (req, res) => {
   try {
     const { status } = req.body;
@@ -127,7 +155,6 @@ router.put('/:id/status', protect, authorize('doctor'), async (req, res) => {
 
 // @route   PUT /api/appointments/:id/prescription
 // @desc    Doctor writes a prescription and marks the appointment completed
-//          (mirrors prescription.php)
 router.put('/:id/prescription', protect, authorize('doctor'), async (req, res) => {
   try {
     const { prescription } = req.body;

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Mirrors the original `appointments` table.
+// One appointment slot booking against a doctor's schedule.
 const appointmentSchema = new mongoose.Schema(
   {
     patient: {
@@ -25,6 +25,17 @@ const appointmentSchema = new mongoose.Schema(
     prescription: { type: String, default: null },
   },
   { timestamps: true }
+);
+
+// Prevents double-booking the same doctor/date/time slot at the database
+// level. Scoped to non-cancelled statuses (via partialFilterExpression) so
+// a cancelled appointment frees the slot up for someone else to book again.
+appointmentSchema.index(
+  { doctor: 1, appointmentDate: 1, startTime: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { status: { $in: ['pending', 'completed'] } },
+  }
 );
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

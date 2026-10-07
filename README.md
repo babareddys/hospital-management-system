@@ -20,6 +20,9 @@ JWT authentication and bcrypt password hashing.
 - **Backend:** Node.js, Express, Mongoose
 - **Database:** MongoDB
 - **Auth:** JWT (JSON Web Tokens) + bcrypt password hashing
+- **Data integrity:** a partial unique index on `Appointment` (doctor +
+  date + time, scoped to non-cancelled statuses) makes it impossible to
+  double-book the same slot, even under concurrent requests
 
 ## Project Structure
 
@@ -112,7 +115,7 @@ Visit `http://localhost:5173`.
 |--------|--------------------------------------------|---------------|--------------|
 | POST   | `/api/auth/register/patient`               | Public        | Register a patient |
 | POST   | `/api/auth/register/doctor`                | Public        | Register a doctor (seeds default sessions) |
-| POST   | `/api/auth/register/admin`                 | Public*       | Register an admin |
+| POST   | `/api/auth/register/admin`                 | Bootstrap / Admin* | Register an admin |
 | POST   | `/api/auth/login`                          | Public        | Login (any role) |
 | GET    | `/api/auth/me`                             | Authenticated | Current user's profile |
 | GET    | `/api/doctors`                             | Public        | List all doctors |
@@ -131,9 +134,9 @@ Visit `http://localhost:5173`.
 | PUT    | `/api/appointments/:id/status`             | Doctor (own)  | Complete/cancel (only from pending) |
 | PUT    | `/api/appointments/:id/prescription`       | Doctor (own)  | Save prescription (marks completed) |
 
-\* Open registration for admins is convenient for local development and
-demos; lock this down (e.g. require an existing admin, or an invite code)
-before deploying publicly.
+\* Admin registration is locked down: it only succeeds if no admin exists
+yet (first-run bootstrap) or if the request carries a valid admin's JWT
+(an existing admin inviting another). Anyone else gets a 403.
 
 ## Deploying
 

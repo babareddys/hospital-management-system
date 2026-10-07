@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
-// Mirrors the original `doctor_sessions` table: each doctor has up to two
-// sessions per weekday (morning/afternoon), used to build the "available
-// slots" a patient can pick from when booking.
+// Each doctor has up to two sessions per weekday (morning/afternoon), used
+// to build the "available slots" a patient can pick from when booking.
 const doctorSessionSchema = new mongoose.Schema(
   {
     doctor: {

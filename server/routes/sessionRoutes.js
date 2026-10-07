@@ -16,9 +16,8 @@ const DAYS = [
 ];
 
 // @route   GET /api/doctors/:doctorId/sessions
-// @desc    Public: get all session timings for a doctor, grouped by day
-//          (mirrors session_timings.php + the sessions table used in
-//          book_appointment.php)
+// @desc    Public: get all session timings for a doctor, grouped by day.
+//          Used by the booking flow to show which slots are open.
 router.get('/doctors/:doctorId/sessions', async (req, res) => {
   try {
     const sessions = await DoctorSession.find({ doctor: req.params.doctorId }).sort(
@@ -44,7 +43,6 @@ router.get('/doctors/:doctorId/sessions', async (req, res) => {
 
 // @route   PUT /api/doctors/:doctorId/sessions/:day
 // @desc    Doctor edits their own two sessions for a given weekday
-//          (mirrors edit_session.php)
 router.put(
   '/doctors/:doctorId/sessions/:day',
   protect,

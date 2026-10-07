@@ -17,8 +17,7 @@ const DAYS = [
 ];
 
 // @route   GET /api/doctors
-// @desc    Public list of all doctors (used by the "Book Appointment" page,
-//          mirrors the doctor dropdown in book_appointment.php)
+// @desc    Public list of all doctors (used by the "Book Appointment" page)
 router.get('/', async (req, res) => {
   const doctors = await User.find({ role: 'doctor' }).select(
     'name specialization username'
@@ -37,7 +36,6 @@ router.get('/:id', async (req, res) => {
 
 // @route   POST /api/doctors
 // @desc    Admin directly adds a doctor + seeds default session timings
-//          (mirrors the "Add Doctor" form in manage_doctors.php)
 router.post('/', protect, authorize('admin'), async (req, res) => {
   try {
     const { name, specialization, username, password } = req.body;
@@ -85,7 +83,6 @@ router.post('/', protect, authorize('admin'), async (req, res) => {
 
 // @route   DELETE /api/doctors/:id
 // @desc    Admin deletes a doctor, their sessions, and their appointments
-//          (mirrors the delete logic in manage_doctors.php)
 router.delete('/:id', protect, authorize('admin'), async (req, res) => {
   try {
     const doctor = await User.findOne({ _id: req.params.id, role: 'doctor' });

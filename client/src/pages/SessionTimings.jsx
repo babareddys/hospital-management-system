@@ -5,8 +5,8 @@ import api from '../api/axios';
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-// Mirrors session_timings.php (table view) + edit_session.php (inline edit
-// per day, rather than a separate page, since it's the same small form).
+// A weekly table of the doctor's two daily sessions, with inline per-day
+// editing rather than a separate edit page since the form is small.
 const SessionTimings = () => {
   const { user } = useAuth();
   const [sessions, setSessions] = useState([]); // grouped by day, as returned by API

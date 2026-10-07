@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
-// Admin's read-only, system-wide view of every appointment
-// (mirrors manage_appointments.php's admin branch).
+// Admin's read-only, system-wide view of every appointment.
 const ManageAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);

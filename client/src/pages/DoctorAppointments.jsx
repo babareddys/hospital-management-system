@@ -2,9 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
-// Combines the original appointments.php (list), edit_appointment.php
-// (status change) and prescription.php (write prescription) into one
-// doctor-facing page with inline actions.
+// A single doctor-facing page that lists appointments and lets the doctor
+// change status or write a prescription inline, without separate pages.
 const DoctorAppointments = () => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
